@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理页面 - Spirit Cage</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .admin-panel {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .admin-section {
+      margin-bottom: 40px;
+    }
+    .admin-section:last-child {
+      margin-bottom: 0;
+    }
+    .admin-section h2 {
+      margin-top: 0;
+      color: var(--primary-color);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .admin-actions {
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .admin-table th, .admin-table td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    .admin-table th {
+      background-color: #f5f5f7;
+    }
+    .status-container {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      display: none;
+    }
+    .status-success {
+      color: #28a745;
+      border-color: #28a745;
+      background-color: #f0fff4;
+    }
+    .status-error {
+      color: #dc3545;
+      border-color: #dc3545;
+      background-color: #fff5f5;
+    }
+  </style>
+</head>
+<body data-page="admin">
+  <!-- 侧边栏切换按钮 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">首页</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">新游戏</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>游戏标签</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">查看所有标签</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">所有游戏</span>
+      </a>
+      
+      <a href="admin.html" class="nav-link active">
+        <i class="fas fa-cog"></i>
+        <span class="nav-link-text">管理</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage - 管理页面</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <div class="admin-panel">
+      <div class="admin-section">
+        <h2>数据同步</h2>
+        <p>
+          本地游戏数据会自动与远程API源数据同步，同步间隔为7天。您也可以手动触发同步。
+        </p>
+        <p>
+          上次同步时间：<span id="last-sync-time">正在获取...</span>
+        </p>
+        <div class="admin-actions">
+          <button id="sync-btn" class="btn">
+            <i class="fas fa-sync-alt"></i> 立即同步游戏数据
+          </button>
+        </div>
+        <div id="sync-status" class="status-container"></div>
+      </div>
+      
+      <div class="admin-section">
+        <h2>游戏数据概览</h2>
+        <p>
+          当前本地游戏数量：<span id="games-count">正在获取...</span>
+        </p>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>游戏标题</th>
+              <th>标签</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="games-table-body">
+            <!-- 游戏数据将通过JavaScript加载 -->
+            <tr>
+              <td colspan="3">正在加载游戏数据...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- 引入游戏数据脚本 -->
+  <script src="games-loader.js"></script>
+  <script src="js/main.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取DOM元素
+      const lastSyncTimeEl = document.getElementById('last-sync-time');
+      const syncBtn = document.getElementById('sync-btn');
+      const syncStatusEl = document.getElementById('sync-status');
+      const gamesCountEl = document.getElementById('games-count');
+      const gamesTableBodyEl = document.getElementById('games-table-body');
+      
+      // 格式化日期时间
+      function formatDateTime(timestamp) {
+        if (!timestamp) return '从未同步';
+        
+        const date = new Date(parseInt(timestamp));
+        return date.toLocaleString('zh-CN', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit' 
+        });
+      }
+      
+      // 更新同步时间
+      function updateLastSyncTime() {
+        const lastSyncTime = localStorage.getItem('games_last_sync_time');
+        lastSyncTimeEl.textContent = formatDateTime(lastSyncTime);
+      }
+      
+      // 更新游戏数据表格
+      function updateGamesTable() {
+        if (window.gameData && window.gameData.length > 0) {
+          // 更新游戏数量
+          gamesCountEl.textContent = window.gameData.length;
+          
+          // 清空表格
+          gamesTableBodyEl.innerHTML = '';
+          
+          // 添加游戏数据行
+          window.gameData.forEach(game => {
+            const row = document.createElement('tr');
+            
+            // 游戏标题列
+            const titleCell = document.createElement('td');
+            titleCell.textContent = game.title;
+            row.appendChild(titleCell);
+            
+            // 标签列
+            const tagsCell = document.createElement('td');
+            const tagsArray = game.tags ? game.tags.split(',') : [];
+            tagsCell.textContent = tagsArray.slice(0, 3).join(', ') + (tagsArray.length > 3 ? '...' : '');
+            row.appendChild(tagsCell);
+            
+            // 操作列
+            const actionsCell = document.createElement('td');
+            const viewLink = document.createElement('a');
+            viewLink.href = `game.html?title=${encodeURIComponent(game.title)}`;
+            viewLink.className = 'btn btn-secondary';
+            viewLink.textContent = '查看';
+            viewLink.style.padding = '5px 10px';
+            viewLink.style.fontSize = '12px';
+            actionsCell.appendChild(viewLink);
+            row.appendChild(actionsCell);
+            
+            gamesTableBodyEl.appendChild(row);
+          });
+        } else {
+          // 没有游戏数据
+          gamesTableBodyEl.innerHTML = '<tr><td colspan="3">未找到游戏数据</td></tr>';
+          gamesCountEl.textContent = '0';
+        }
+      }
+      
+      // 初始化页面
+      updateLastSyncTime();
+      updateGamesTable();
+      
+      // 绑定同步按钮点击事件
+      syncBtn.addEventListener('click', function() {
+        // 显示正在同步提示
+        syncStatusEl.className = 'status-container';
+        syncStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在同步游戏数据，请稍候...';
+        syncStatusEl.style.display = 'block';
+        
+        // 禁用同步按钮
+        syncBtn.disabled = true;
+        
+        // 检查是否有手动同步方法
+        if (typeof window.manualSyncGamesData === 'function') {
+          // 添加自定义事件监听
+          const syncSuccessHandler = function(e) {
+            // 更新同步状态
+            syncStatusEl.className = 'status-container status-success';
+            syncStatusEl.innerHTML = '<i class="fas fa-check-circle"></i> 同步成功！共同步了 ' + e.detail.length + ' 个游戏。';
+            
+            // 更新页面数据
+            updateLastSyncTime();
+            updateGamesTable();
+            
+            // 启用同步按钮
+            syncBtn.disabled = false;
+            
+            // 移除事件监听器
+            document.removeEventListener('gamesDataUpdated', syncSuccessHandler);
+          };
+          
+          document.addEventListener('gamesDataUpdated', syncSuccessHandler);
+          
+          // 触发手动同步
+          try {
+            window.manualSyncGamesData();
+            
+            // 设置超时保护，如果10秒后没有收到同步完成事件，则显示错误
+            setTimeout(function() {
+              if (syncBtn.disabled) {
+                syncStatusEl.className = 'status-container status-error';
+                syncStatusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 同步超时，请稍后再试。';
+                syncBtn.disabled = false;
+                document.removeEventListener('gamesDataUpdated', syncSuccessHandler);
+              }
+            }, 10000);
+          } catch (error) {
+            syncStatusEl.className = 'status-container status-error';
+            syncStatusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 同步失败：' + error.message;
+            syncBtn.disabled = false;
+          }
+        } else {
+          syncStatusEl.className = 'status-container status-error';
+          syncStatusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 同步功能不可用，请刷新页面后重试。';
+          syncBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

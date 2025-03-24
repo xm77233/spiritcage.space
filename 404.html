@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found - Spirit Cage</title>
+  <meta name="description" content="The page you're looking for could not be found.">
+  <link rel="canonical" href="https://spiritcage.space/404.html">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .error-container {
+      text-align: center;
+      margin-top: 100px;
+    }
+    .error-code {
+      font-size: 8rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    .error-message {
+      font-size: 1.5rem;
+      color: var(--text-color);
+      margin-bottom: 30px;
+    }
+    .back-home {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.2s ease;
+    }
+    .back-home:hover {
+      background-color: var(--accent-blue);
+      color: white;
+    }
+  </style>
+</head>
+<body data-page="error">
+  <!-- 侧边栏切换按钮移到侧边栏外部，确保始终可见 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <div class="error-container">
+      <div class="error-code">404</div>
+      <h1 class="error-message">Page Not Found</h1>
+      <p>Sorry, the page you are looking for doesn't exist or has been moved.</p>
+      <a href="index.html" class="back-home">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html> 

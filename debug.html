@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据加载调试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #007BFF;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #0069d9;
+    }
+    .status {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    .log-container {
+      margin-top: 20px;
+    }
+    .data-sample {
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>游戏数据加载调试工具</h1>
+    
+    <div>
+      <button id="checkFile">检查JSON文件</button>
+      <button id="loadDirect">直接加载JSON</button>
+      <button id="loadWithFetch">使用Fetch加载</button>
+      <button id="clearLogs">清除日志</button>
+      <button id="clearCache">清除缓存</button>
+    </div>
+    
+    <div id="status" class="status info">
+      准备就绪，请点击按钮执行操作...
+    </div>
+    
+    <div class="log-container">
+      <h3>日志输出：</h3>
+      <pre id="log"></pre>
+    </div>
+    
+    <div id="dataSample" class="data-sample">
+      <h3>数据示例：</h3>
+      <pre id="jsonData"></pre>
+    </div>
+  </div>
+
+  <script>
+    // 日志输出函数
+    function log(message, isError = false) {
+      const logElement = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      
+      if (isError) {
+        logElement.innerHTML += `<span style="color:red">[${time}] ${message}</span>\n`;
+      } else {
+        logElement.innerHTML += `[${time}] ${message}\n`;
+      }
+      
+      // 自动滚动到底部
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    // 更新状态
+    function updateStatus(message, type) {
+      const statusElement = document.getElementById('status');
+      statusElement.className = `status ${type}`;
+      statusElement.textContent = message;
+    }
+    
+    // 检查JSON文件
+    document.getElementById('checkFile').addEventListener('click', function() {
+      log('开始检查games_data.json文件...');
+      
+      const xhr = new XMLHttpRequest();
+      xhr.open('HEAD', 'games_data.json', true);
+      
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const contentType = xhr.getResponseHeader('Content-Type');
+          const contentLength = xhr.getResponseHeader('Content-Length');
+          
+          log(`文件状态: ${xhr.statusText} (${xhr.status})`);
+          log(`Content-Type: ${contentType}`);
+          log(`Content-Length: ${contentLength} 字节`);
+          
+          updateStatus('文件检查完成！', 'success');
+        } else {
+          log(`文件请求失败: ${xhr.status} ${xhr.statusText}`, true);
+          updateStatus('文件检查失败！', 'error');
+        }
+      };
+      
+      xhr.onerror = function() {
+        log('文件请求错误，无法访问文件', true);
+        updateStatus('文件检查失败！', 'error');
+      };
+      
+      xhr.send();
+    });
+    
+    // 直接加载JSON
+    document.getElementById('loadDirect').addEventListener('click', function() {
+      log('开始直接加载JSON文件...');
+      updateStatus('加载中...', 'info');
+      
+      const script = document.createElement('script');
+      script.src = 'games_data.json';
+      
+      script.onload = function() {
+        log('文件已加载，但这不是一个有效的JavaScript文件');
+        updateStatus('加载方法不适用于JSON文件', 'error');
+      };
+      
+      script.onerror = function() {
+        log('文件加载失败，这是预期的，因为JSON不能作为脚本直接加载', true);
+        
+        // 尝试使用文件标签
+        log('尝试使用AJAX方式加载...');
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'games_data.json', true);
+        xhr.responseType = 'json';
+        
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            log('AJAX加载成功!');
+            displayJsonData(xhr.response);
+            updateStatus('JSON加载成功！', 'success');
+          } else {
+            log(`AJAX加载失败: ${xhr.status} ${xhr.statusText}`, true);
+            updateStatus('JSON加载失败！', 'error');
+          }
+        };
+        
+        xhr.onerror = function() {
+          log('AJAX请求错误', true);
+          updateStatus('JSON加载失败！', 'error');
+        };
+        
+        xhr.send();
+      };
+      
+      document.head.appendChild(script);
+    });
+    
+    // 使用Fetch加载
+    document.getElementById('loadWithFetch').addEventListener('click', function() {
+      log('使用Fetch API加载games_data.json...');
+      updateStatus('加载中...', 'info');
+      
+      // 添加时间戳防止缓存
+      const url = `games_data.json?t=${new Date().getTime()}`;
+      
+      fetch(url)
+        .then(response => {
+          log(`响应状态: ${response.status} ${response.statusText}`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP错误! 状态: ${response.status}`);
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          log(`解析完成! 数据类型: ${typeof data}`);
+          log(`是否为数组: ${Array.isArray(data)}`);
+          
+          if (Array.isArray(data)) {
+            log(`数组长度: ${data.length}`);
+            
+            if (data.length > 0) {
+              log(`第一项: ${JSON.stringify(data[0]).substring(0, 100)}...`);
+            }
+            
+            displayJsonData(data);
+            updateStatus('JSON加载成功！', 'success');
+          } else {
+            log('数据不是数组', true);
+            updateStatus('JSON格式不正确', 'error');
+          }
+        })
+        .catch(error => {
+          log(`加载失败: ${error.message}`, true);
+          updateStatus('JSON加载失败！', 'error');
+        });
+    });
+    
+    // 清除日志
+    document.getElementById('clearLogs').addEventListener('click', function() {
+      document.getElementById('log').innerHTML = '';
+      document.getElementById('jsonData').innerHTML = '';
+      document.getElementById('dataSample').style.display = 'none';
+      updateStatus('日志已清除', 'info');
+    });
+    
+    // 清除缓存
+    document.getElementById('clearCache').addEventListener('click', function() {
+      log('清除本地存储缓存...');
+      
+      try {
+        localStorage.removeItem('spirit_cage_games_data');
+        localStorage.removeItem('spirit_cage_games_timestamp');
+        localStorage.removeItem('games_last_sync_time');
+        
+        log('缓存已清除!');
+        updateStatus('缓存已清除', 'success');
+      } catch (error) {
+        log(`清除缓存失败: ${error.message}`, true);
+        updateStatus('清除缓存失败', 'error');
+      }
+    });
+    
+    // 显示JSON数据
+    function displayJsonData(data) {
+      const jsonDataElement = document.getElementById('jsonData');
+      const dataSampleElement = document.getElementById('dataSample');
+      
+      // 仅显示前3个游戏
+      const sample = Array.isArray(data) ? data.slice(0, 3) : data;
+      jsonDataElement.textContent = JSON.stringify(sample, null, 2);
+      dataSampleElement.style.display = 'block';
+    }
+  </script>
+</body>
+</html> 

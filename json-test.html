@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON数据加载测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f7;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #007AFF;
+      margin-top: 0;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f8f8;
+      border-radius: 5px;
+    }
+    .btn {
+      background: #007AFF;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    #log {
+      background: #333;
+      color: #f8f8f8;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      margin-top: 20px;
+      height: 300px;
+      overflow-y: auto;
+    }
+    .game-preview {
+      border: 1px solid #eee;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .game-title {
+      margin-top: 0;
+      color: #007AFF;
+    }
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 60%;
+      background-color: #000;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    .iframe-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>JSON数据加载测试</h1>
+    
+    <!-- 测试按钮 -->
+    <div class="test-section">
+      <h2>测试方法</h2>
+      <p>点击下方按钮尝试不同的方式加载 games_data.json 文件：</p>
+      
+      <button class="btn" id="method1">方法1: 相对路径fetch</button>
+      <button class="btn" id="method2">方法2: 绝对路径fetch</button>
+      <button class="btn" id="method3">方法3: XMLHttpRequest</button>
+      <button class="btn" id="method4">方法4: 直接引入script标签</button>
+      <button class="btn" id="clear-log">清空日志</button>
+    </div>
+    
+    <!-- 内联script引入游戏数据 -->
+    <div id="json-script-container"></div>
+    
+    <!-- 日志输出 -->
+    <div id="log"></div>
+    
+    <!-- 游戏展示区域 -->
+    <div id="game-preview"></div>
+  </div>
+
+  <script>
+    // 日志函数
+    function log(message) {
+      const logElement = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString();
+      logElement.innerHTML += `[${timestamp}] ${message}\n`;
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    // 清除日志
+    document.getElementById('clear-log').addEventListener('click', function() {
+      document.getElementById('log').innerHTML = '';
+    });
+    
+    // 显示游戏
+    function displayGame(game) {
+      const container = document.getElementById('game-preview');
+      
+      container.innerHTML = `
+        <div class="game-preview">
+          <h3 class="game-title">${game.title}</h3>
+          <p>${game.description}</p>
+          <p>标签: ${game.tags}</p>
+          <button class="btn" id="load-game">加载游戏</button>
+        </div>
+      `;
+      
+      document.getElementById('load-game').addEventListener('click', function() {
+        container.innerHTML += `
+          <div class="iframe-container">
+            <iframe src="${game.embed}" allowfullscreen allow="fullscreen; autoplay"></iframe>
+          </div>
+        `;
+      });
+    }
+    
+    // 方法1: 使用fetch和相对路径
+    document.getElementById('method1').addEventListener('click', async function() {
+      log('使用fetch和相对路径加载JSON...');
+      
+      try {
+        const response = await fetch('./games_data.json');
+        
+        log(`HTTP状态: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+          throw new Error(`错误: ${response.status}`);
+        }
+        
+        const text = await response.text();
+        log(`获取到原始文本: ${text.substring(0, 100)}...`);
+        
+        const data = JSON.parse(text);
+        log(`成功解析JSON, 包含 ${data.length} 个游戏`);
+        
+        if (data.length > 0) {
+          displayGame(data[0]);
+        }
+      } catch (error) {
+        log(`错误: ${error.message}`);
+      }
+    });
+    
+    // 方法2: 使用fetch和绝对路径
+    document.getElementById('method2').addEventListener('click', async function() {
+      const absoluteUrl = window.location.href.replace(/\/[^\/]*$/, '/games_data.json');
+      log(`使用fetch和绝对路径加载JSON: ${absoluteUrl}`);
+      
+      try {
+        const response = await fetch(absoluteUrl);
+        
+        log(`HTTP状态: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+          throw new Error(`错误: ${response.status}`);
+        }
+        
+        const text = await response.text();
+        log(`获取到原始文本: ${text.substring(0, 100)}...`);
+        
+        const data = JSON.parse(text);
+        log(`成功解析JSON, 包含 ${data.length} 个游戏`);
+        
+        if (data.length > 0) {
+          displayGame(data[0]);
+        }
+      } catch (error) {
+        log(`错误: ${error.message}`);
+      }
+    });
+    
+    // 方法3: 使用XMLHttpRequest
+    document.getElementById('method3').addEventListener('click', function() {
+      log('使用XMLHttpRequest加载JSON...');
+      
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          log(`HTTP状态: ${xhr.status}`);
+          
+          if (xhr.status === 200) {
+            try {
+              const text = xhr.responseText;
+              log(`获取到原始文本: ${text.substring(0, 100)}...`);
+              
+              const data = JSON.parse(text);
+              log(`成功解析JSON, 包含 ${data.length} 个游戏`);
+              
+              if (data.length > 0) {
+                displayGame(data[0]);
+              }
+            } catch (error) {
+              log(`解析错误: ${error.message}`);
+            }
+          } else {
+            log(`请求错误: ${xhr.status}`);
+          }
+        }
+      };
+      
+      xhr.open('GET', './games_data.json', true);
+      xhr.send();
+    });
+    
+    // 方法4: 使用script标签加载
+    document.getElementById('method4').addEventListener('click', function() {
+      log('使用script标签加载JSON...');
+      
+      try {
+        // 删除之前可能存在的script标签
+        const oldScript = document.getElementById('json-script');
+        if (oldScript) {
+          oldScript.remove();
+        }
+        
+        // 创建script标签
+        const script = document.createElement('script');
+        script.id = 'json-script';
+        script.textContent = `
+          window.jsonData = ${JSON.stringify([
+            {
+              "title": "麻将连连看",
+              "embed": "https://cloud.onlinegames.io/games/2025/unity/mahjong/index-og.html",
+              "image": "https://www.onlinegames.io/media/posts/966/responsive/Mahjong-xs.jpg",
+              "tags": "1-player,2d,brain,cozy,free,html5,logic,mouse,puzzle,strategy",
+              "description": "麻将连连看是一款考验耐心、技巧和一点运气的游戏。在这个游戏中，你的目标是匹配相同的牌，将它们从棋盘上移除，直到没有牌为止。"
+            }
+          ])};
+          
+          log("通过script标签成功加载游戏数据");
+          displayGame(window.jsonData[0]);
+        `;
+        
+        // 添加到页面
+        document.getElementById('json-script-container').appendChild(script);
+      } catch (error) {
+        log(`错误: ${error.message}`);
+      }
+    });
+    
+    // 页面加载完成时记录
+    window.addEventListener('DOMContentLoaded', function() {
+      log('页面加载完成，请点击上方按钮测试不同加载方法');
+    });
+  </script>
+</body>
+</html> 

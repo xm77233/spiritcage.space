@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏数据修复工具</title>
+  <style>
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    h1 {
+      color: #0366d6;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      background-color: #0366d6;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #0256b9;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    #status {
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    
+    .progress {
+      height: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: #0366d6;
+      width: 0;
+      transition: width 0.3s;
+    }
+    
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+    
+    .game-count {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .data-preview {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>游戏数据修复工具</h1>
+  
+  <div class="container">
+    <div class="actions">
+      <button id="loadBtn">加载游戏数据</button>
+      <button id="fixBtn">修复数据问题</button>
+      <button id="clearCacheBtn">清除缓存</button>
+      <button id="saveBtn" disabled>保存修复后的数据</button>
+    </div>
+    
+    <div id="status" class="info">请点击"加载游戏数据"按钮开始操作</div>
+    
+    <div class="progress">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+    
+    <div id="gameCount" class="game-count"></div>
+    
+    <div class="data-preview">
+      <h3>游戏数据预览：</h3>
+      <pre id="dataPreview"></pre>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h2>使用说明</h2>
+    <div class="card">
+      <h3>问题诊断</h3>
+      <p>当前网站只显示了备用的4个游戏，而不是全部游戏的原因可能是：</p>
+      <ol>
+        <li>games_data.json 文件无法正确加载或解析</li>
+        <li>游戏数据的格式有问题，导致解析失败</li>
+        <li>localStorage缓存问题导致数据被错误覆盖</li>
+      </ol>
+    </div>
+    
+    <div class="card">
+      <h3>解决方案</h3>
+      <p>本工具将帮助您：</p>
+      <ol>
+        <li>检查games_data.json文件是否可以正确加载</li>
+        <li>修复可能存在的数据格式问题</li>
+        <li>清除本地存储缓存以确保使用最新数据</li>
+        <li>确认数据已正确加载到window.gameData中</li>
+      </ol>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取DOM元素
+      const loadBtn = document.getElementById('loadBtn');
+      const fixBtn = document.getElementById('fixBtn');
+      const clearCacheBtn = document.getElementById('clearCacheBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const statusEl = document.getElementById('status');
+      const progressBar = document.getElementById('progressBar');
+      const gameCount = document.getElementById('gameCount');
+      const dataPreview = document.getElementById('dataPreview');
+      
+      // 游戏数据存储
+      let gameData = null;
+      
+      // 设置状态
+      function setStatus(message, type) {
+        statusEl.className = type;
+        statusEl.textContent = message;
+      }
+      
+      // 更新进度条
+      function updateProgress(percent) {
+        progressBar.style.width = `${percent}%`;
+      }
+      
+      // 加载游戏数据
+      loadBtn.addEventListener('click', function() {
+        loadGameData();
+      });
+      
+      // 清除缓存
+      clearCacheBtn.addEventListener('click', function() {
+        try {
+          localStorage.removeItem('spirit_cage_games_data');
+          localStorage.removeItem('spirit_cage_games_timestamp');
+          localStorage.removeItem('games_last_sync_time');
+          setStatus('缓存已清除！', 'success');
+        } catch (error) {
+          setStatus(`清除缓存失败: ${error.message}`, 'error');
+        }
+      });
+      
+      // 修复数据
+      fixBtn.addEventListener('click', function() {
+        if (!gameData) {
+          setStatus('请先加载游戏数据！', 'error');
+          return;
+        }
+        
+        try {
+          setStatus('正在修复数据...', 'info');
+          updateProgress(30);
+          
+          // 修复tags字段
+          gameData = gameData.map(game => {
+            // 确保title字段存在
+            if (!game.title) {
+              game.title = '未命名游戏';
+            }
+            
+            // 确保tags字段是字符串
+            if (game.tags && Array.isArray(game.tags)) {
+              game.tags = game.tags.join(',');
+            } else if (!game.tags) {
+              game.tags = '';
+            }
+            
+            // 确保description字段存在
+            if (!game.description) {
+              game.description = '暂无描述';
+            }
+            
+            // 确保image字段存在
+            if (!game.image) {
+              game.image = 'images/placeholder.jpg';
+            }
+            
+            return game;
+          });
+          
+          updateProgress(60);
+          
+          // 设置全局游戏数据
+          window.gameData = gameData;
+          
+          // 显示游戏数量
+          gameCount.textContent = `共加载了 ${gameData.length} 个游戏`;
+          
+          // 显示修复后的数据预览
+          showDataPreview();
+          
+          updateProgress(100);
+          setStatus('数据修复完成！', 'success');
+          
+          // 启用保存按钮
+          saveBtn.disabled = false;
+          
+        } catch (error) {
+          setStatus(`修复数据失败: ${error.message}`, 'error');
+          updateProgress(0);
+        }
+      });
+      
+      // 保存修复后的数据
+      saveBtn.addEventListener('click', function() {
+        if (!gameData) {
+          setStatus('没有数据可保存！', 'error');
+          return;
+        }
+        
+        try {
+          // 保存到localStorage
+          localStorage.setItem('spirit_cage_games_data', JSON.stringify(gameData));
+          localStorage.setItem('spirit_cage_games_timestamp', new Date().getTime().toString());
+          
+          setStatus('数据已保存到本地缓存！', 'success');
+          
+          // 显示提示信息
+          const message = document.createElement('div');
+          message.className = 'success';
+          message.innerHTML = `
+            <p>修复完成！现在您可以:</p>
+            <p>1. 返回首页刷新查看游戏列表</p>
+            <p>2. 或者在其他页面刷新，数据应该已经可以正常显示</p>
+          `;
+          
+          statusEl.parentNode.appendChild(message);
+          
+        } catch (error) {
+          setStatus(`保存数据失败: ${error.message}`, 'error');
+        }
+      });
+      
+      // 加载游戏数据
+      function loadGameData() {
+        setStatus('正在加载游戏数据...', 'info');
+        updateProgress(10);
+        
+        // 添加时间戳防止缓存
+        const url = `games_data.json?t=${new Date().getTime()}`;
+        
+        fetch(url)
+          .then(response => {
+            updateProgress(30);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP错误，状态码: ${response.status}`);
+            }
+            
+            return response.json();
+          })
+          .then(data => {
+            updateProgress(60);
+            
+            if (!Array.isArray(data)) {
+              throw new Error('加载的数据不是数组');
+            }
+            
+            // 保存数据
+            gameData = data;
+            
+            // 设置全局游戏数据
+            window.gameData = data;
+            
+            // 显示游戏数量
+            gameCount.textContent = `共加载了 ${data.length} 个游戏`;
+            
+            // 显示数据预览
+            showDataPreview();
+            
+            updateProgress(100);
+            setStatus('游戏数据加载成功！', 'success');
+            
+          })
+          .catch(error => {
+            setStatus(`加载游戏数据失败: ${error.message}`, 'error');
+            updateProgress(0);
+          });
+      }
+      
+      // 显示数据预览
+      function showDataPreview() {
+        if (!gameData || !gameData.length) {
+          dataPreview.textContent = '没有数据可显示';
+          return;
+        }
+        
+        // 显示前3个游戏
+        const preview = gameData.slice(0, 3);
+        dataPreview.textContent = JSON.stringify(preview, null, 2);
+      }
+    });
+  </script>
+</body>
+</html> 

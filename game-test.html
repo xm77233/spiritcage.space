@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏测试 - Spirit Cage</title>
+  <meta name="description" content="测试页面 - Spirit Cage游戏网站">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* 游戏测试页面特定样式 */
+    .test-games-container {
+      margin-top: 20px;
+    }
+    .game-preview {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: var(--card-shadow);
+    }
+    .game-title {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+    .game-info {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .game-description {
+      flex: 1;
+      min-width: 300px;
+      margin-right: 20px;
+      margin-bottom: 15px;
+    }
+    .game-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    .game-tag {
+      background: #f0f0f0;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 60%; /* 控制高宽比 */
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .iframe-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body data-page="game-test">
+  <!-- 侧边栏切换按钮 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">游戏测试页面</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <h2 class="page-title">游戏测试</h2>
+    
+    <div class="test-games-container" id="test-games">
+      <!-- 游戏内容将由JavaScript动态加载 -->
+      <div class="loader" id="games-loader"></div>
+    </div>
+  </main>
+
+  <!-- 引入游戏数据脚本 -->
+  <script src="games-loader.js"></script>
+  
+  <script>
+    // 侧边栏切换功能
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-hidden');
+      
+      // 更新侧边栏状态到本地存储
+      const isSidebarHidden = document.body.classList.contains('sidebar-hidden');
+      localStorage.setItem('sidebarHidden', isSidebarHidden);
+      
+      // 更新按钮位置
+      const toggleBtn = document.getElementById('toggle-sidebar');
+      if (toggleBtn) {
+        if (isSidebarHidden) {
+          toggleBtn.style.left = '15px';
+          // 更新图标方向
+          const icon = toggleBtn.querySelector('i');
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        } else {
+          toggleBtn.style.left = 'calc(var(--sidebar-width) - 15px)';
+          // 重置图标方向
+          const icon = toggleBtn.querySelector('i');
+          if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+      }
+    }
+    
+    // 从URL参数中获取游戏标题
+    function getGameTitleFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('title');
+    }
+    
+    // 根据标题查找游戏
+    function findGameByTitle(title) {
+      if (!title || !window.gameData) return null;
+      
+      // 精确匹配
+      let game = window.gameData.find(g => g.title === title);
+      
+      // 如果没有精确匹配，尝试不区分大小写匹配
+      if (!game) {
+        const lowerTitle = title.toLowerCase();
+        game = window.gameData.find(g => g.title.toLowerCase() === lowerTitle);
+      }
+      
+      return game;
+    }
+    
+    // 游戏加载功能
+    function loadGames() {
+      const gamesContainer = document.getElementById('test-games');
+      const loader = document.getElementById('games-loader');
+      
+      // 隐藏加载提示
+      if (loader) loader.style.display = 'none';
+      
+      // 从games-loader.js中获取游戏数据
+      if (!window.gameData || !window.gameData.length) {
+        gamesContainer.innerHTML = '<p>无法加载游戏数据</p>';
+        return;
+      }
+      
+      // 尝试从URL参数获取游戏标题
+      const gameTitle = getGameTitleFromUrl();
+      let testGames = [];
+      
+      if (gameTitle) {
+        // 如果有指定标题，尝试查找
+        const game = findGameByTitle(gameTitle);
+        if (game) {
+          // 找到了游戏，只显示这一个
+          testGames = [game];
+        } else {
+          // 没找到，显示提示信息
+          gamesContainer.innerHTML = `<p>找不到名为 "${gameTitle}" 的游戏</p>`;
+          // 并添加所有游戏的链接
+          gamesContainer.innerHTML += `<p><a href="all-games.html" class="btn">查看所有游戏</a></p>`;
+          return;
+        }
+      } else {
+        // 没有指定标题，显示前4个游戏
+        testGames = window.gameData.slice(0, 4);
+      }
+      
+      // 创建游戏显示区域
+      let gamesHTML = '';
+      
+      testGames.forEach(game => {
+        // 处理标签
+        const tagsArray = game.tags ? game.tags.split(',') : [];
+        const tagsHTML = tagsArray.map(tag => 
+          `<span class="game-tag">${tag.trim()}</span>`
+        ).join('');
+        
+        // 游戏预览HTML - 显示图片，点击后才加载游戏
+        gamesHTML += `
+          <div class="game-preview">
+            <h3 class="game-title">${game.title}</h3>
+            
+            <div class="game-info">
+              <div class="game-description">
+                <p>${game.description}</p>
+                <div class="game-tags">${tagsHTML}</div>
+              </div>
+            </div>
+            
+            <div class="iframe-container" id="container-${encodeURIComponent(game.title)}">
+              <img src="${game.image}" alt="${game.title}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); padding: 15px 30px; border-radius: 50px;">
+                <button class="btn" onclick="location.href='game.html?title=${encodeURIComponent(game.title)}'">
+                  <i class="fas fa-play"></i> 开始游戏
+                </button>
+              </div>
+            </div>
+            
+            <button class="btn" onclick="window.open('${game.embed}', '_blank')">
+              <i class="fas fa-external-link-alt"></i> 在新窗口打开
+            </button>
+          </div>
+        `;
+      });
+      
+      // 更新页面内容
+      gamesContainer.innerHTML = gamesHTML;
+      
+      // 如果是从URL参数指定的单个游戏，更新页面标题
+      if (gameTitle && testGames.length === 1) {
+        document.querySelector('.site-title').textContent = testGames[0].title;
+        document.querySelector('.page-title').textContent = '游戏详情';
+      }
+    }
+    
+    // 加载游戏iframe
+    function loadGameIframe(gameUrl, gameId) {
+      const container = document.getElementById(`container-${gameId}`);
+      if (!container) return;
+      
+      // 清空容器
+      container.innerHTML = '';
+      
+      // 创建iframe元素
+      const iframe = document.createElement('iframe');
+      iframe.src = gameUrl;
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('allow', 'fullscreen; autoplay');
+      
+      // 添加到容器
+      container.appendChild(iframe);
+      
+      // 添加全屏按钮
+      const fullscreenBtn = document.createElement('button');
+      fullscreenBtn.className = 'btn fullscreen-btn';
+      fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+      fullscreenBtn.style.position = 'absolute';
+      fullscreenBtn.style.bottom = '10px';
+      fullscreenBtn.style.right = '10px';
+      fullscreenBtn.style.zIndex = '10';
+      fullscreenBtn.onclick = function() { requestFullscreen(this); };
+      
+      container.appendChild(fullscreenBtn);
+    }
+    
+    // 全屏功能
+    function requestFullscreen(button) {
+      const iframe = button.parentElement.querySelector('iframe');
+      if (iframe) {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.mozRequestFullScreen) {
+          iframe.mozRequestFullScreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.msRequestFullscreen) {
+          iframe.msRequestFullscreen();
+        }
+      }
+    }
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化侧边栏状态
+      const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+      if (toggleSidebarBtn) {
+        // 从本地存储读取侧边栏状态
+        const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+        // 在移动设备上默认隐藏侧边栏
+        const isMobile = window.innerWidth <= 768;
+        
+        if (sidebarHidden || isMobile) {
+          document.body.classList.add('sidebar-hidden');
+          // 设置按钮位置
+          toggleSidebarBtn.style.left = '15px';
+          // 更新按钮图标方向
+          const icon = toggleSidebarBtn.querySelector('i');
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+        
+        // 添加点击事件
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+      }
+      
+      // 直接加载游戏数据
+      loadGames();
+    });
+  </script>
+</body>
+</html> 

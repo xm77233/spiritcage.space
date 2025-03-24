@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Games - Spirit Cage</title>
+  <meta name="description" content="Discover the latest and newest games added to Spirit Cage. Play free online games updated regularly.">
+  <link rel="canonical" href="https://spiritcage.space/new-games.html">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-page="new-games">
+  <!-- 侧边栏切换按钮移到侧边栏外部，确保始终可见 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link active">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <section>
+      <h1 class="page-title">New Games</h1>
+      <p>Check out our latest collection of games added to Spirit Cage. New games are added regularly!</p>
+      
+      <div class="loader" id="games-loader"></div>
+      <div class="games-grid" id="new-games">
+        <!-- 游戏卡片将由JavaScript动态生成 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- 引入游戏数据脚本 -->
+  <script src="games-loader.js"></script>
+  <script src="js/main.js"></script>
+  
+  <script>
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 监听游戏数据加载完成事件
+      document.addEventListener('gamesDataLoaded', () => {
+        console.log('新游戏页面：游戏数据加载完成，开始渲染...');
+        // 隐藏加载动画
+        const loader = document.getElementById('games-loader');
+        if (loader) loader.style.display = 'none';
+        
+        // 使用main.js中的渲染函数
+        if (typeof renderNewGames === 'function') {
+          renderNewGames(20); // 显示20个新游戏
+        } else {
+          console.error('无法找到renderNewGames函数，请确保main.js已正确加载');
+          // 显示错误消息
+          const gamesContainer = document.getElementById('new-games');
+          if (gamesContainer) {
+            gamesContainer.innerHTML = '<p>无法加载游戏数据</p>';
+          }
+        }
+      });
+      
+      // 如果游戏数据已加载，直接渲染
+      if (window.gameData && window.gameData.length > 0) {
+        if (typeof renderNewGames === 'function') {
+          const loader = document.getElementById('games-loader');
+          if (loader) loader.style.display = 'none';
+          renderNewGames(20);
+        }
+      }
+      
+      // 监听游戏数据更新事件（当数据被同步时）
+      document.addEventListener('gamesDataUpdated', () => {
+        console.log('游戏数据已更新，重新加载页面...');
+        if (typeof renderNewGames === 'function') {
+          renderNewGames(20);
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

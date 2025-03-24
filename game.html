@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play Game - Spirit Cage</title>
+  <meta name="description" content="Play online games at Spirit Cage. Enjoy free browser games.">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* 游戏详情页特定样式 */
+    .game-details {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: var(--card-shadow);
+    }
+    .game-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .game-title {
+      color: var(--primary-color);
+      margin-right: auto;
+      margin-bottom: 10px;
+    }
+    .game-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    .game-tag {
+      background: #f0f0f0;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .game-description {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .game-iframe-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 60%; /* 控制高宽比 */
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .game-iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .game-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+    .btn-fullscreen {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .not-found {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+    }
+  </style>
+  <!-- 动态生成canonical链接和标题 -->
+  <script>
+    // 从URL参数中获取游戏标题
+    function getGameTitleFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('title');
+    }
+    
+    // 根据标题查找游戏
+    function findGameByTitle(title) {
+      if (!title || !window.gameData) return null;
+      
+      // 精确匹配
+      let game = window.gameData.find(g => g.title === title);
+      
+      // 如果没有精确匹配，尝试不区分大小写匹配
+      if (!game) {
+        const lowerTitle = title.toLowerCase();
+        game = window.gameData.find(g => g.title.toLowerCase() === lowerTitle);
+      }
+      
+      return game;
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const gameTitle = getGameTitleFromUrl();
+      
+      if (gameTitle) {
+        // 设置canonical链接
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.href = `https://spiritcage.space/game.html?title=${encodeURIComponent(gameTitle)}`;
+        }
+        
+        // 游戏标题将在加载游戏数据后更新
+      } else {
+        // 如果没有游戏标题参数，返回首页
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+  <link rel="canonical" href="https://spiritcage.space/game.html">
+</head>
+<body data-page="game-detail">
+  <!-- 侧边栏切换按钮移到侧边栏外部，确保始终可见 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">首页</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">新游戏</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>游戏标签</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">查看所有标签</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">所有游戏</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <div id="game-content">
+      <!-- 游戏内容将由JavaScript动态加载 -->
+      <div class="loader" id="game-loader"></div>
+    </div>
+  </main>
+
+  <!-- 引入游戏数据脚本，确保先加载游戏数据 -->
+  <script src="games-loader.js"></script>
+  <script src="js/main.js"></script>
+  
+  <script>
+    // 加载游戏详情
+    function loadGameDetails() {
+      const contentContainer = document.getElementById('game-content');
+      const loader = document.getElementById('game-loader');
+      
+      // 隐藏加载提示
+      if (loader) loader.style.display = 'none';
+      
+      // 从URL获取游戏标题
+      const gameTitle = getGameTitleFromUrl();
+      
+      if (!gameTitle) {
+        // 没有标题参数，返回首页
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // 确保游戏数据已加载，如果未加载，等待500毫秒后再次尝试
+      if (!window.gameData || !window.gameData.length) {
+        contentContainer.innerHTML = '<div class="loader" style="display:flex;"></div>';
+        setTimeout(loadGameDetails, 800); // 增加等待时间，确保数据加载
+        return;
+      }
+      
+      // 查找游戏
+      const game = findGameByTitle(gameTitle);
+      
+      if (!game) {
+        // 没找到游戏
+        contentContainer.innerHTML = `
+          <div class="not-found">
+            <h2>找不到游戏</h2>
+            <p>抱歉，找不到名为"${gameTitle}"的游戏</p>
+            <div class="game-actions">
+              <a href="index.html" class="btn">返回首页</a>
+              <a href="all-games.html" class="btn btn-secondary">浏览所有游戏</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      // 更新页面标题
+      document.title = `${game.title} - Spirit Cage`;
+      document.querySelector('.site-title').textContent = game.title;
+      
+      // 处理标签
+      const tagsArray = game.tags ? game.tags.split(',') : [];
+      const tagsHTML = tagsArray.map(tag => 
+        `<span class="game-tag">${tag.trim()}</span>`
+      ).join('');
+      
+      // 创建游戏详情HTML
+      const gameHTML = `
+        <div class="game-details">
+          <div class="game-header">
+            <h1 class="game-title">${game.title}</h1>
+          </div>
+          
+          <div class="game-tags">${tagsHTML}</div>
+          
+          <div class="game-description">
+            <p>${game.description}</p>
+          </div>
+          
+          <div class="game-iframe-container">
+            <iframe src="${game.embed}" class="game-iframe" allowfullscreen></iframe>
+            <button class="btn-fullscreen" onclick="requestFullscreen(this)">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          
+          <div class="game-actions">
+            <a href="javascript:history.back();" class="btn btn-secondary">
+              <i class="fas fa-arrow-left"></i> 返回
+            </a>
+            <a href="${game.embed}" target="_blank" class="btn">
+              <i class="fas fa-external-link-alt"></i> 在新窗口打开
+            </a>
+          </div>
+        </div>
+      `;
+      
+      // 更新页面内容
+      contentContainer.innerHTML = gameHTML;
+    }
+    
+    // 全屏功能
+    function requestFullscreen(button) {
+      const iframe = button.parentElement.querySelector('iframe');
+      if (iframe) {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.mozRequestFullScreen) {
+          iframe.mozRequestFullScreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.msRequestFullscreen) {
+          iframe.msRequestFullscreen();
+        }
+      }
+    }
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化侧边栏状态
+      const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+      if (toggleSidebarBtn) {
+        // 从本地存储读取侧边栏状态
+        const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+        // 在移动设备上默认隐藏侧边栏
+        const isMobile = window.innerWidth <= 768;
+        
+        if (sidebarHidden || isMobile) {
+          document.body.classList.add('sidebar-hidden');
+          // 设置按钮位置
+          toggleSidebarBtn.style.left = '15px';
+          // 更新按钮图标方向
+          const icon = toggleSidebarBtn.querySelector('i');
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+        
+        // 添加点击事件
+        toggleSidebarBtn.addEventListener('click', function() {
+          document.body.classList.toggle('sidebar-hidden');
+          
+          // 更新侧边栏状态到本地存储
+          const isSidebarHidden = document.body.classList.contains('sidebar-hidden');
+          localStorage.setItem('sidebarHidden', isSidebarHidden);
+          
+          // 更新按钮位置
+          if (isSidebarHidden) {
+            this.style.left = '15px';
+            // 更新图标方向
+            const icon = this.querySelector('i');
+            if (icon) icon.style.transform = 'rotate(180deg)';
+          } else {
+            this.style.left = 'calc(var(--sidebar-width) - 15px)';
+            // 重置图标方向
+            const icon = this.querySelector('i');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+      
+      // 监听游戏数据加载完成事件
+      document.addEventListener('gamesDataLoaded', () => {
+        console.log('游戏详情页：游戏数据加载完成，开始渲染游戏详情...');
+        loadGameDetails();
+      });
+      
+      // 如果数据已经加载完成，直接加载游戏详情
+      if (window.gameData && window.gameData.length > 0) {
+        loadGameDetails();
+      } else {
+        // 数据未加载完成，显示加载中
+        const contentContainer = document.getElementById('game-content');
+        const loader = document.getElementById('game-loader');
+        if (loader) loader.style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏数据加载测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .game-card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .game-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    .game-tags {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .game-description {
+      font-size: 14px;
+    }
+    #status {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .loading {
+      background-color: #cce5ff;
+    }
+    .success {
+      background-color: #d4edda;
+    }
+    .error {
+      background-color: #f8d7da;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    #controls {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>游戏数据加载测试</h1>
+  
+  <div id="controls">
+    <button id="loadBtn">加载JSON数据</button>
+    <button id="clearBtn">清除缓存</button>
+  </div>
+  
+  <div id="status" class="loading">准备加载数据...</div>
+  
+  <div id="counter"></div>
+  <div id="games-container"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusEl = document.getElementById('status');
+      const counterEl = document.getElementById('counter');
+      const gamesContainer = document.getElementById('games-container');
+      const loadBtn = document.getElementById('loadBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      
+      // 清除缓存按钮
+      clearBtn.addEventListener('click', function() {
+        localStorage.clear();
+        alert('本地存储缓存已清除');
+      });
+      
+      // 加载按钮
+      loadBtn.addEventListener('click', function() {
+        loadGameData();
+      });
+      
+      // 加载游戏数据
+      function loadGameData() {
+        statusEl.className = 'loading';
+        statusEl.textContent = '正在加载游戏数据...';
+        gamesContainer.innerHTML = '';
+        counterEl.textContent = '';
+        
+        // 使用fetch API加载JSON数据
+        fetch('games_data.json?t=' + new Date().getTime())
+          .then(response => {
+            statusEl.textContent = `服务器响应状态: ${response.status} ${response.statusText}`;
+            
+            if (!response.ok) {
+              throw new Error(`HTTP请求失败，状态码: ${response.status}`);
+            }
+            
+            return response.json();
+          })
+          .then(data => {
+            if (!Array.isArray(data)) {
+              throw new Error('加载的数据不是数组');
+            }
+            
+            // 显示游戏数量
+            counterEl.textContent = `成功加载 ${data.length} 个游戏`;
+            
+            // 更新状态
+            statusEl.className = 'success';
+            statusEl.textContent = `成功加载游戏数据，共 ${data.length} 个游戏`;
+            
+            // 显示前10个游戏
+            const gamesToShow = data.slice(0, 10);
+            
+            // 生成游戏卡片
+            gamesToShow.forEach(game => {
+              const gameCard = document.createElement('div');
+              gameCard.className = 'game-card';
+              
+              gameCard.innerHTML = `
+                <div class="game-title">${game.title || '无标题'}</div>
+                <div class="game-tags">标签: ${game.tags || '无标签'}</div>
+                <div class="game-description">${game.description ? game.description.substring(0, 100) + '...' : '无描述'}</div>
+              `;
+              
+              gamesContainer.appendChild(gameCard);
+            });
+            
+            // 如果游戏数量超过10个，显示提示信息
+            if (data.length > 10) {
+              const moreInfo = document.createElement('div');
+              moreInfo.textContent = `... 还有 ${data.length - 10} 个游戏未显示`;
+              moreInfo.style.textAlign = 'center';
+              moreInfo.style.marginTop = '10px';
+              moreInfo.style.fontStyle = 'italic';
+              gamesContainer.appendChild(moreInfo);
+            }
+          })
+          .catch(error => {
+            statusEl.className = 'error';
+            statusEl.textContent = `加载失败: ${error.message}`;
+            console.error('加载游戏数据失败:', error);
+          });
+      }
+      
+      // 页面加载完成后自动加载数据
+      loadGameData();
+    });
+  </script>
+</body>
+</html> 

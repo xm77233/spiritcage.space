@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>所有游戏 - Spirit Cage</title>
+  <meta name="description" content="浏览Spirit Cage上的所有游戏。发现最好玩的在线游戏。">
+  <link rel="canonical" href="https://spiritcage.space/all-games.html">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* 游戏卡片特定样式 */
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+      height: 100%;
+      cursor: pointer;
+      opacity: 0; /* 初始不可见 */
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: calc(var(--card-index, 0) * 0.05s); /* 更短的间隔确保快速显示 */
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .game-image-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9比例 */
+      overflow: hidden;
+      background-color: #f0f0f0; /* 图片加载前的背景色 */
+    }
+    
+    .game-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+    
+    .game-info {
+      padding: 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .game-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .game-tags {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .game-tag {
+      background: #f5f5f7;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .play-button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: background-color 0.2s ease;
+    }
+    
+    .play-button:hover {
+      background-color: var(--accent-blue);
+    }
+    
+    /* 骨架屏样式 - 图片加载前的占位效果 */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* 状态栏样式 */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 0 5px;
+    }
+    
+    #games-count {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+    
+    /* 进度条样式 */
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background-color: #f0f0f0;
+      border-radius: 2px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary-color);
+      width: 0;
+      transition: width 0.3s ease;
+    }
+    
+    /* 加载更多按钮样式 */
+    #load-more {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s ease;
+    }
+    
+    #load-more:hover {
+      background-color: var(--accent-blue);
+    }
+    
+    /* 无结果提示样式 */
+    .no-results {
+      text-align: center;
+      padding: 30px 0;
+      color: #666;
+      font-size: 16px;
+    }
+    
+    /* 加载动画样式 */
+    .loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80px;
+      width: 100%;
+    }
+    
+    .loader:after {
+      content: " ";
+      display: block;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 6px solid var(--primary-color);
+      border-color: var(--primary-color) transparent var(--primary-color) transparent;
+      animation: loader 1.2s linear infinite;
+    }
+    
+    @keyframes loader {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body data-page="all-games">
+  <!-- 侧边栏切换按钮 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link active">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">所有游戏</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <!-- 搜索和筛选区域 -->
+    <div class="filter-container">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="搜索游戏...">
+        <button id="search-button">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      
+      <div class="sort-options">
+        <label for="sort-select">排序:</label>
+        <select id="sort-select">
+          <option value="default">默认</option>
+          <option value="name-asc">名称 (A-Z)</option>
+          <option value="name-desc">名称 (Z-A)</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- 加载状态显示 -->
+    <div class="status-bar">
+      <p id="games-count"></p>
+      <div id="progress-container" class="progress-container" style="display:none">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+    </div>
+    
+    <!-- 游戏卡片网格 -->
+    <div class="games-grid" id="all-games-container">
+      <div class="loader"></div>
+      <!-- 游戏卡片将由JavaScript动态生成 -->
+    </div>
+    
+    <!-- 加载更多按钮 -->
+    <div class="load-more-container" id="load-more-container" style="display:none; text-align:center; margin-top:20px;">
+      <button id="load-more" class="btn">加载更多游戏</button>
+    </div>
+  </main>
+
+  <!-- 引入游戏数据脚本 -->
+  <script src="games-loader.js"></script>
+  <script src="js/main.js"></script>
+  
+  <script>
+    // 在页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 游戏容器和搜索元素
+      const gamesContainer = document.getElementById('all-games-container');
+      const searchInput = document.getElementById('search-input');
+      const searchButton = document.getElementById('search-button');
+      const sortSelect = document.getElementById('sort-select');
+      const gamesCountElem = document.getElementById('games-count');
+      const progressBar = document.getElementById('progress-bar');
+      const progressContainer = document.getElementById('progress-container');
+      const loadMoreContainer = document.getElementById('load-more-container');
+      const loadMoreButton = document.getElementById('load-more');
+      
+      // 游戏显示状态变量
+      let allGamesCache = [];
+      let filteredGames = [];
+      let currentPage = 1;
+      const gamesPerPage = 50; // 每页显示的游戏数量
+      let isSearchActive = false;
+      let searchDebounceTimer = null;
+      
+      // 监听游戏数据加载完成事件
+      document.addEventListener('gamesDataLoaded', () => {
+        console.log('所有游戏页面：游戏数据加载完成，开始渲染...');
+        // 隐藏加载动画
+        const loader = gamesContainer.querySelector('.loader');
+        if (loader) loader.style.display = 'none';
+        
+        // 缓存所有游戏
+        allGamesCache = [...window.gameData];
+        
+        // 初始加载第一页游戏
+        filteredGames = allGamesCache;
+        resetAndDisplayGames();
+      });
+      
+      // 搜索游戏 - 添加防抖动
+      function searchGames(searchTerm = '', sortOption = 'default') {
+        // 显示加载提示
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        
+        // 清除之前的定时器
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        
+        // 设置新的定时器
+        searchDebounceTimer = setTimeout(() => {
+          // 获取所有游戏
+          const allGames = allGamesCache;
+          if (!allGames || allGames.length === 0) {
+            gamesContainer.innerHTML = '<p>无法加载游戏数据</p>';
+            return;
+          }
+          
+          // 模拟进度
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = `${Math.min(progress, 90)}%`;
+            
+            if (progress >= 100) {
+              clearInterval(progressInterval);
+            }
+          }, 50);
+          
+          // 筛选游戏
+          let searchResults = allGames;
+          isSearchActive = !!searchTerm;
+          
+          if (searchTerm) {
+            searchTerm = searchTerm.toLowerCase();
+            // 优化搜索逻辑，按相关性排序
+            searchResults = searchResults.filter(game => {
+              const titleMatch = game.title && game.title.toLowerCase().includes(searchTerm);
+              const descMatch = game.description && game.description.toLowerCase().includes(searchTerm);
+              const tagsMatch = game.tags && (typeof game.tags === 'string' ? 
+                game.tags.toLowerCase().includes(searchTerm) : 
+                game.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                
+              return titleMatch || descMatch || tagsMatch;
+            });
+            
+            // 按相关性排序 - 标题匹配排最前面
+            searchResults.sort((a, b) => {
+              const aInTitle = a.title.toLowerCase().includes(searchTerm) ? 1 : 0;
+              const bInTitle = b.title.toLowerCase().includes(searchTerm) ? 1 : 0;
+              return bInTitle - aInTitle;
+            });
+          }
+          
+          // 按选择的方式排序
+          if (sortOption === 'name-asc') {
+            searchResults.sort((a, b) => a.title.localeCompare(b.title));
+          } else if (sortOption === 'name-desc') {
+            searchResults.sort((a, b) => b.title.localeCompare(a.title));
+          }
+          
+          // 更新筛选后的游戏列表
+          filteredGames = searchResults;
+          
+          // 重置分页并显示第一页
+          resetAndDisplayGames();
+          
+          // 完成加载，隐藏进度条
+          progressBar.style.width = '100%';
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+          }, 300);
+          
+        }, 300); // 300ms的防抖延迟
+      }
+      
+      // 重置分页并显示第一页
+      function resetAndDisplayGames() {
+        currentPage = 1;
+        gamesContainer.innerHTML = '';
+        displayGamesPage();
+      }
+      
+      // 显示当前页的游戏
+      function displayGamesPage() {
+        // 更新游戏计数
+        updateGamesCount();
+        
+        // 计算当前页的游戏范围
+        const startIndex = (currentPage - 1) * gamesPerPage;
+        const endIndex = Math.min(startIndex + gamesPerPage, filteredGames.length);
+        const currentPageGames = filteredGames.slice(startIndex, endIndex);
+        
+        // 没有结果时显示提示
+        if (currentPageGames.length === 0) {
+          if (isSearchActive) {
+            gamesContainer.innerHTML = '<p class="no-results">没有找到匹配的游戏</p>';
+          } else {
+            gamesContainer.innerHTML = '<p class="no-results">暂无游戏数据</p>';
+          }
+          loadMoreContainer.style.display = 'none';
+          return;
+        }
+        
+        // 创建文档片段提高性能
+        const fragment = document.createDocumentFragment();
+        
+        // 生成游戏卡片
+        currentPageGames.forEach((game, index) => {
+          // 处理标签，最多显示3个
+          const tagsArray = game.tags ? 
+            (typeof game.tags === 'string' ? game.tags.split(',') : game.tags) : 
+            [];
+          const tagsHTML = tagsArray.slice(0, 3).map(tag => 
+            `<span class="game-tag">${tag.trim()}</span>`
+          ).join('');
+          
+          // 创建游戏卡片元素
+          const card = document.createElement('div');
+          card.className = 'game-card';
+          card.style.setProperty('--card-index', index % gamesPerPage);
+          
+          // 游戏卡片HTML
+          card.innerHTML = `
+            <div class="game-image-container skeleton">
+              <img src="${game.image}" alt="${game.title}" class="game-image" loading="lazy">
+            </div>
+            <div class="game-info">
+              <h3 class="game-title">${game.title}</h3>
+              <p class="game-description">${game.description ? game.description.substring(0, 80) + '...' : ''}</p>
+              <div class="game-tags">${tagsHTML}</div>
+              <a href="game.html?title=${encodeURIComponent(game.title)}" class="play-button">
+                <i class="fas fa-play"></i> 开始游戏
+              </a>
+            </div>
+          `;
+          
+          // 图片加载完成后移除骨架屏
+          const img = card.querySelector('img');
+          if (img) {
+            img.onload = function() {
+              const container = img.closest('.game-image-container');
+              if (container) container.classList.remove('skeleton');
+            };
+          }
+          
+          fragment.appendChild(card);
+        });
+        
+        // 将游戏卡片添加到容器
+        if (currentPage === 1) {
+          // 第一页，清空容器
+          gamesContainer.innerHTML = '';
+        }
+        gamesContainer.appendChild(fragment);
+        
+        // 更新加载更多按钮状态
+        if (endIndex < filteredGames.length) {
+          loadMoreContainer.style.display = 'block';
+        } else {
+          loadMoreContainer.style.display = 'none';
+        }
+      }
+      
+      // 更新游戏计数显示
+      function updateGamesCount() {
+        if (gamesCountElem) {
+          if (isSearchActive) {
+            gamesCountElem.textContent = `找到 ${filteredGames.length} 个游戏`;
+          } else {
+            gamesCountElem.textContent = `共有 ${filteredGames.length} 个游戏`;
+          }
+        }
+      }
+      
+      // 加载更多按钮点击事件
+      loadMoreButton.addEventListener('click', () => {
+        currentPage++;
+        displayGamesPage();
+      });
+      
+      // 尝试加载游戏数据
+      function tryLoadGames() {
+        if (window.gameData && window.gameData.length) {
+          // 游戏数据已加载，直接显示
+          allGamesCache = [...window.gameData];
+          filteredGames = allGamesCache;
+          resetAndDisplayGames();
+        } else {
+          // 游戏数据未加载，等待数据加载事件通知
+          const loader = gamesContainer.querySelector('.loader');
+          if (loader) loader.style.display = 'flex';
+        }
+      }
+      
+      // 搜索按钮点击事件
+      searchButton.addEventListener('click', () => {
+        const searchTerm = searchInput.value.trim();
+        const sortOption = sortSelect.value;
+        searchGames(searchTerm, sortOption);
+      });
+      
+      // 搜索框回车事件
+      searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          const searchTerm = searchInput.value.trim();
+          const sortOption = sortSelect.value;
+          searchGames(searchTerm, sortOption);
+        }
+      });
+      
+      // 排序下拉框变化事件
+      sortSelect.addEventListener('change', () => {
+        const searchTerm = searchInput.value.trim();
+        const sortOption = sortSelect.value;
+        searchGames(searchTerm, sortOption);
+      });
+      
+      // 监听游戏数据更新事件（当数据被同步时）
+      document.addEventListener('gamesDataUpdated', () => {
+        console.log('游戏数据已更新，重新加载页面...');
+        allGamesCache = [...window.gameData];
+        const searchTerm = searchInput.value.trim();
+        const sortOption = sortSelect.value;
+        searchGames(searchTerm, sortOption);
+      });
+      
+      // 初始尝试加载游戏
+      tryLoadGames();
+      
+      // 添加窗口滚动事件，实现无限滚动
+      window.addEventListener('scroll', () => {
+        // 在搜索激活时不使用无限滚动
+        if (isSearchActive) return;
+        
+        // 当用户滚动到页面底部附近时，自动加载更多
+        if (loadMoreContainer.style.display !== 'none') {
+          const distanceToBottom = document.documentElement.scrollHeight - 
+                                  (window.scrollY + window.innerHeight);
+          if (distanceToBottom < 300) { // 当距离底部小于300px时加载更多
+            loadMoreButton.click();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

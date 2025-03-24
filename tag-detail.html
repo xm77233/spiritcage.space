@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tag Games - Spirit Cage</title>
+  <meta name="description" content="Browse games by specific tag at Spirit Cage. Find games in your favorite category.">
+  <link rel="canonical" href="https://spiritcage.space/tag-detail.html">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- 动态生成canonical链接 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tag = new URLSearchParams(window.location.search).get('tag');
+      if (tag) {
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        canonicalLink.href = `https://spiritcage.space/tag-detail.html?tag=${encodeURIComponent(tag)}`;
+        document.title = `${tag} Games - Spirit Cage`;
+      }
+    });
+  </script>
+</head>
+<body data-page="tag-detail">
+  <!-- 侧边栏切换按钮移到侧边栏外部，确保始终可见 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <section>
+      <h1 class="page-title" id="tag-title">Games Tagged: </h1>
+      <p>Browse all games with this tag. Click on a game to play.</p>
+      
+      <div class="loader"></div>
+      <div class="games-grid" id="tag-games">
+        <!-- 游戏卡片将由JavaScript动态生成 -->
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html> 
