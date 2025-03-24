@@ -1,315 +1,445 @@
 <!DOCTYPE html>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-267DEFLBLK"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-267DEFLBLK');
-</script>
-
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Tester Story - An Immersive Online Adventure Game</title>
-    <meta name="description" content="Explore the mystical world of Love Tester Story, an immersive online adventure game where you test your compatibility and forge your destiny.">
-    <meta name="keywords" content="Love Tester Story, online game, adventure game, love tester, compatibility test, relationship game">
-    <meta name="author" content="Love Tester Story">
-    <link rel="canonical" href="https://spiritcage.space">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spirit Cage - Online Games</title>
+  <meta name="description" content="Play free online games at Spirit Cage. Discover a collection of the best browser games.">
+  <link rel="canonical" href="https://spiritcage.space/">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 字体图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* 游戏卡片特定样式 */
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+      height: 100%;
+      cursor: pointer;
+      opacity: 0; /* 初始不可见 */
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: calc(var(--card-index, 0) * 0.1s);
+    }
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://spiritcage.space">
-    <meta property="og:title" content="Love Tester Story - An Immersive Online Adventure Game">
-    <meta property="og:description" content="Explore the mystical world of Love Tester Story, an immersive online adventure game where you test your compatibility and forge your destiny.">
-    <meta property="og:image" content="https://spiritcage.space/images/og-image.jpg">
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://spiritcage.space">
-    <meta name="twitter:title" content="Love Tester Story - An Immersive Online Adventure Game">
-    <meta name="twitter:description" content="Explore the mystical world of Love Tester Story, an immersive online adventure game where you test your compatibility and forge your destiny.">
-    <meta name="twitter:image" content="https://spiritcage.space/images/twitter-image.jpg">
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'apple-blue': '#007AFF',
-                        'apple-green': '#34C759',
-                        'apple-indigo': '#5856D6',
-                        'apple-orange': '#FF9500',
-                        'apple-pink': '#FF2D55',
-                        'apple-purple': '#AF52DE',
-                        'apple-red': '#FF3B30',
-                        'apple-teal': '#5AC8FA',
-                        'apple-yellow': '#FFCC00',
-                        'apple-gray': '#8E8E93',
-                        'apple-light-gray': '#E5E5EA',
-                        'apple-bg': '#F2F2F7',
-                    }
-                }
-            }
-        }
-    </script>
-    <style type="text/css">
-        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #F2F2F7;
-        }
-        
-        .game-container {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        
-        .responsive-iframe {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        }
-        
-        .responsive-iframe iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        @media (max-width: 640px) {
-            .responsive-iframe {
-                padding-top: 75%; /* 4:3 Aspect Ratio for mobile */
-            }
-        }
-    </style>
+    .game-image-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9比例 */
+      overflow: hidden;
+      background-color: #f0f0f0; /* 图片加载前的背景色 */
+    }
+    
+    .game-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+    
+    .game-info {
+      padding: 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .game-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .game-tags {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .game-tag {
+      background: #f5f5f7;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .play-button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: background-color 0.2s ease;
+    }
+    
+    .play-button:hover {
+      background-color: var(--accent-blue);
+    }
+    
+    /* 骨架屏样式 - 图片加载前的占位效果 */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* 加载器样式 */
+    .loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80px;
+      width: 100%;
+    }
+    
+    .loader:after {
+      content: " ";
+      display: block;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 6px solid var(--primary-color);
+      border-color: var(--primary-color) transparent var(--primary-color) transparent;
+      animation: loader 1.2s linear infinite;
+    }
+    
+    @keyframes loader {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* 提高视觉效果的元素交错淡入 */
+    .page-title {
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: 0.1s;
+    }
+    
+    section {
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: 0.2s;
+    }
+    
+    section + section {
+      animation-delay: 0.3s;
+    }
+  </style>
 </head>
-<body class="bg-apple-bg">
-    <header class="bg-gradient-to-r from-apple-blue to-apple-purple py-6 sm:py-10">
-        <div class="container mx-auto px-4">
-            <nav class="flex justify-between items-center mb-8">
-                <div class="text-white font-bold text-2xl">Love Tester Story</div>
-                <ul class="hidden sm:flex space-x-6 text-white">
-                    <li><a href="#" class="hover:text-apple-yellow transition">Home</a></li>
-                    <li><a href="#about" class="hover:text-apple-yellow transition">About</a></li>
-                    <li><a href="#features" class="hover:text-apple-yellow transition">Features</a></li>
-                    <li><a href="#play" class="hover:text-apple-yellow transition">Play Now</a></li>
-                </ul>
-                <button class="sm:hidden text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            </nav>
+<body data-page="home">
+  <!-- 侧边栏切换按钮移到侧边栏外部，确保始终可见 -->
+  <button class="toggle-sidebar" id="toggle-sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <!-- 侧边栏导航 -->
+  <aside class="sidebar">
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link active">
+        <i class="fas fa-home"></i>
+        <span class="nav-link-text">Home</span>
+      </a>
+      <a href="new-games.html" class="nav-link">
+        <i class="fas fa-fire"></i>
+        <span class="nav-link-text">New Games</span>
+      </a>
+      
+      <div class="tags-dropdown">
+        <button class="tags-dropdown-button">
+          <i class="fas fa-tags"></i>
+          <span>Game Tags</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="tags-dropdown-content">
+          <!-- 将由JavaScript动态填充 -->
+          <a href="tags.html">View All Tags</a>
+        </div>
+      </div>
+      
+      <a href="all-games.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span class="nav-link-text">All Games</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <h1 class="site-title">Spirit Cage</h1>
+  </header>
+
+  <!-- 主要内容区域 -->
+  <main class="main-content">
+    <section>
+      <h2 class="page-title">Featured Games</h2>
+      <div class="loader" id="featured-loader"></div>
+      <div class="games-grid" id="featured-games">
+        <!-- 游戏卡片将由JavaScript动态生成 -->
+      </div>
+    </section>
+    
+    <section>
+      <h2 class="page-title">New Games</h2>
+      <div class="loader" id="new-loader"></div>
+      <div class="games-grid" id="new-games">
+        <!-- 游戏卡片将由JavaScript动态生成 -->
+      </div>
+      <div class="view-more">
+        <a href="all-games.html" class="btn">View More Games</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 引入游戏数据脚本 -->
+  <script src="games-loader.js"></script>
+  <script src="js/main.js"></script>
+  
+  <script>
+    // 在控制台输出游戏数据状态
+    console.log('页面初始化 - 游戏数据状态检查');
+    console.log('window.gameData 是否存在:', !!window.gameData);
+    if (window.gameData) {
+      console.log('游戏数量:', window.gameData.length);
+      if (window.gameData.length > 0) {
+        console.log('第一个游戏:', window.gameData[0].title);
+      }
+    }
+    
+    // 监控游戏数据变化
+    let dataCheckInterval = setInterval(function() {
+      if (window.gameData && window.gameData.length > 4) {
+        console.log('游戏数据已成功加载:', window.gameData.length, '个游戏');
+        clearInterval(dataCheckInterval);
+      }
+    }, 1000);
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 监听游戏数据加载完成事件
+      document.addEventListener('gamesDataLoaded', () => {
+        console.log('主页：游戏数据加载完成，开始渲染...');
+        // 使用main.js中的渲染函数
+        if (typeof renderFeaturedGames === 'function') {
+          renderFeaturedGames();
+          addCardIndexes('#featured-games'); // 添加动画索引
+        } else {
+          // 备用方案：使用本地实现
+          loadFeaturedGames();
+        }
+        
+        if (typeof renderNewGames === 'function') {
+          renderNewGames(8);
+          addCardIndexes('#new-games'); // 添加动画索引
+        } else {
+          // 备用方案：使用本地实现
+          loadNewGames();
+        }
+        
+        // 为图片添加懒加载
+        setupLazyLoading();
+      });
+      
+      // 添加动画索引，使卡片交错显示
+      function addCardIndexes(containerSelector) {
+        const container = document.querySelector(containerSelector);
+        if (!container) return;
+        
+        const cards = container.querySelectorAll('.game-card');
+        cards.forEach((card, index) => {
+          card.style.setProperty('--card-index', index);
+        });
+      }
+      
+      // 设置图片懒加载
+      function setupLazyLoading() {
+        // 检查浏览器是否原生支持懒加载
+        if ('loading' in HTMLImageElement.prototype) {
+          // 浏览器支持原生懒加载，已经通过HTML属性设置
+          console.log('使用浏览器原生懒加载');
+        } else {
+          // 浏览器不支持原生懒加载，使用Intersection Observer API
+          console.log('使用Intersection Observer实现懒加载');
+          const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+          
+          const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const img = entry.target;
+                const src = img.getAttribute('data-src') || img.getAttribute('src');
+                
+                if (src) {
+                  img.src = src;
+                  img.classList.remove('skeleton');
+                  observer.unobserve(img);
+                }
+              }
+            });
+          });
+          
+          lazyImages.forEach(img => {
+            // 给图片容器添加骨架屏效果
+            const container = img.closest('.game-image-container');
+            if (container) container.classList.add('skeleton');
             
-            <div class="text-center text-white">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">Love Tester Story</h1>
-                <p class="text-xl sm:text-2xl mb-8">Discover your destiny in this enchanting journey of connections and emotions.</p>
-                <a href="#play" class="bg-white text-apple-purple font-semibold px-6 py-3 rounded-full hover:bg-apple-yellow hover:text-white transition duration-300 inline-block">Play Now</a>
+            // 监听图片
+            imageObserver.observe(img);
+            
+            // 图片加载完成后移除骨架屏
+            img.addEventListener('load', () => {
+              const container = img.closest('.game-image-container');
+              if (container) container.classList.remove('skeleton');
+            });
+          });
+        }
+      }
+    });
+    
+    // 备用的加载精选游戏函数（如果main.js中的函数不可用）
+    function loadFeaturedGames() {
+      const container = document.getElementById('featured-games');
+      const loader = document.getElementById('featured-loader');
+      
+      if (!window.gameData || window.gameData.length === 0) {
+        container.innerHTML = '<p>无法加载游戏数据</p>';
+        if (loader) loader.style.display = 'none';
+        return;
+      }
+      
+      // 随机选择8个游戏作为精选
+      const featuredGames = getRandomGames(window.gameData, 8);
+      
+      // 创建游戏卡片
+      let gamesHTML = '';
+      
+      featuredGames.forEach(game => {
+        // 处理标签，最多显示3个
+        const tagsArray = game.tags ? game.tags.split(',') : [];
+        const tagsHTML = tagsArray.slice(0, 3).map(tag => 
+          `<span class="game-tag">${tag.trim()}</span>`
+        ).join('');
+        
+        // 游戏卡片HTML
+        gamesHTML += `
+          <div class="game-card" onclick="location.href='game.html?title=${encodeURIComponent(game.title)}'">
+            <div class="game-image-container">
+              <img src="${game.image}" alt="${game.title}" class="game-image">
             </div>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-12">
-        <section id="play" class="mb-16">
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Play Love Tester Story</h2>
-            <div class="game-container mx-auto max-w-4xl bg-white p-4">
-                <div class="responsive-iframe">
-                    <iframe src="https://cloud.onlinegames.io/games/2024/construct/225/love-tester-story/index-og.html" allowfullscreen></iframe>
-                </div>
+            <div class="game-info">
+              <h3 class="game-title">${game.title}</h3>
+              <p>${game.description.substring(0, 80)}...</p>
+              <div class="game-tags">${tagsHTML}</div>
+              <a href="game.html?title=${encodeURIComponent(game.title)}" class="play-button">
+                <i class="fas fa-play"></i> 开始游戏
+              </a>
             </div>
-        </section>
-
-        <section id="about" class="mb-16">
-            <div class="grid md:grid-cols-2 gap-10 items-center">
-                <div>
-                    <h2 class="text-3xl font-bold mb-4 text-gray-800">About Love Tester Story</h2>
-                    <p class="text-gray-700 mb-4">Love Tester Story is an immersive online game that takes players on a journey through emotional landscapes and personal connections. The game combines elements of storytelling, decision-making, and compatibility testing to create a unique gaming experience.</p>
-                    <p class="text-gray-700 mb-4">Set in a mystical world where love and emotions intertwine, players navigate through various scenarios that test their emotional intelligence and ability to connect with others. Each decision affects the outcome, making every playthrough unique and personal.</p>
-                </div>
-                <div class="bg-gradient-to-br from-apple-pink to-apple-purple rounded-2xl p-8 text-white">
-                    <h3 class="text-2xl font-bold mb-4">Key Features</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            Immersive storytelling experience
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            Multiple endings based on your choices
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            Compatibility testing mechanics
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            Beautiful visuals and soothing soundtrack
-                        </li>
-                    </ul>
-                </div>
+          </div>
+        `;
+      });
+      
+      // 更新页面内容
+      container.innerHTML = gamesHTML;
+      
+      // 隐藏加载动画
+      if (loader) loader.style.display = 'none';
+    }
+    
+    // 备用的加载新游戏函数（如果main.js中的函数不可用）
+    function loadNewGames() {
+      const container = document.getElementById('new-games');
+      const loader = document.getElementById('new-loader');
+      
+      if (!window.gameData || window.gameData.length === 0) {
+        container.innerHTML = '<p>无法加载游戏数据</p>';
+        if (loader) loader.style.display = 'none';
+        return;
+      }
+      
+      // 显示最新的8个游戏
+      const newGames = window.gameData.slice(-8);
+      
+      // 创建游戏卡片
+      let gamesHTML = '';
+      
+      newGames.forEach(game => {
+        // 处理标签，最多显示3个
+        const tagsArray = game.tags ? game.tags.split(',') : [];
+        const tagsHTML = tagsArray.slice(0, 3).map(tag => 
+          `<span class="game-tag">${tag.trim()}</span>`
+        ).join('');
+        
+        // 游戏卡片HTML
+        gamesHTML += `
+          <div class="game-card" onclick="location.href='game.html?title=${encodeURIComponent(game.title)}'">
+            <div class="game-image-container">
+              <img src="${game.image}" alt="${game.title}" class="game-image">
             </div>
-        </section>
-
-        <section id="features" class="mb-16">
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Game Features</h2>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-blue rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Interactive Storytelling</h3>
-                    <p class="text-gray-700">Engage with a rich narrative that adapts to your choices, creating a personalized experience with each playthrough.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-green rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Relationship Testing</h3>
-                    <p class="text-gray-700">Discover compatibility scores and emotional connections through our advanced testing system.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-purple rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Mystical Environment</h3>
-                    <p class="text-gray-700">Explore beautifully designed spiritual worlds that respond to your emotions and choices.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-orange rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Safe Environment</h3>
-                    <p class="text-gray-700">Enjoy a safe, respectful gaming space designed to explore emotional connections without judgment.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-teal rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Insightful Feedback</h3>
-                    <p class="text-gray-700">Receive detailed insights about your emotional patterns and relationship tendencies.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="w-12 h-12 bg-apple-red rounded-full flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Privacy Focused</h3>
-                    <p class="text-gray-700">Your data and responses remain private, ensuring a confidential and secure gaming experience.</p>
-                </div>
+            <div class="game-info">
+              <h3 class="game-title">${game.title}</h3>
+              <p>${game.description.substring(0, 80)}...</p>
+              <div class="game-tags">${tagsHTML}</div>
+              <a href="game.html?title=${encodeURIComponent(game.title)}" class="play-button">
+                <i class="fas fa-play"></i> 开始游戏
+              </a>
             </div>
-        </section>
-
-        <section class="bg-white rounded-2xl p-8 shadow-lg mb-16">
-            <h2 class="text-3xl font-bold mb-6 text-gray-800">How to Play</h2>
-            <div class="space-y-4">
-                <div class="flex items-start">
-                    <div class="w-8 h-8 bg-apple-blue rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                        <span class="text-white font-bold">1</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold mb-1">Begin Your Journey</h3>
-                        <p class="text-gray-700">Start the game by entering the Love Tester Story world through the iframe above. The mystical journey begins as soon as you click play.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <div class="w-8 h-8 bg-apple-green rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                        <span class="text-white font-bold">2</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold mb-1">Make Meaningful Choices</h3>
-                        <p class="text-gray-700">Throughout your journey, you'll be presented with various decisions. Each choice affects your path and possible connections.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <div class="w-8 h-8 bg-apple-purple rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                        <span class="text-white font-bold">3</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold mb-1">Discover Your Results</h3>
-                        <p class="text-gray-700">After completing the journey, you'll receive insights about your emotional tendencies and compatibility with different spirit types.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <div class="w-8 h-8 bg-apple-orange rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                        <span class="text-white font-bold">4</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold mb-1">Share or Reflect</h3>
-                        <p class="text-gray-700">You can choose to share your results with friends or keep them for personal reflection. Each playthrough offers new insights.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="text-center mb-16">
-            <h2 class="text-3xl font-bold mb-6 text-gray-800">Experience Love Tester Story Today</h2>
-            <p class="text-gray-700 max-w-2xl mx-auto mb-8">Embark on a journey of self-discovery and emotional connection. Love Tester Story offers a unique gaming experience that combines storytelling with meaningful insights about relationships and emotional patterns.</p>
-            <a href="#play" class="bg-gradient-to-r from-apple-blue to-apple-purple text-white font-semibold px-8 py-4 rounded-full hover:from-apple-purple hover:to-apple-blue transition duration-300 inline-block">Play Now</a>
-        </section>
-    </main>
-
-    <footer class="bg-gray-800 text-white py-10">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Love Tester Story</h3>
-                    <p class="text-gray-400">An immersive journey through emotional landscapes and romantic connections. Discover your destiny and forge meaningful bonds.</p>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition">About</a></li>
-                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
-                        <li><a href="#play" class="text-gray-400 hover:text-white transition">Play Now</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Legal</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Cookie Policy</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2023 Love Tester Story. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+          </div>
+        `;
+      });
+      
+      // 更新页面内容
+      container.innerHTML = gamesHTML;
+      
+      // 隐藏加载动画
+      if (loader) loader.style.display = 'none';
+    }
+    
+    // 从数组中随机获取n个元素的辅助函数
+    function getRandomGames(array, n) {
+      // 如果数组长度小于n，则返回整个数组的副本
+      if (array.length <= n) {
+        return [...array];
+      }
+      
+      // 创建数组索引数组
+      const indices = Array.from({ length: array.length }, (_, i) => i);
+      
+      // 洗牌算法
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      
+      // 取前n个索引对应的元素
+      return indices.slice(0, n).map(index => array[index]);
+    }
+  </script>
 </body>
 </html> 
